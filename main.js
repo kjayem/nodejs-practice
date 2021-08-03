@@ -92,7 +92,9 @@ var app = http.createServer(function(request,response){
 
             request.on('end', function(){
                 var post = qs.parse(body);
-                console.log(post.title);
+                var title = post.title;
+                var description = post.description;
+                console.log(title);
             });
 
             response.writeHead(200);
