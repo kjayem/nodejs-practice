@@ -1,6 +1,7 @@
 var http = require('http');
 var fs = require('fs');
 var url = require('url');
+var qs = require('querystring');
 
 function templateHTML(title, list, body) {
     return `
@@ -13,6 +14,7 @@ function templateHTML(title, list, body) {
     <body>
     <h1><a href="/">WEB</a></h1>
         ${list}
+        <a href="/create">create</a>
         ${body}
     </body>
     </html>
@@ -34,9 +36,10 @@ var app = http.createServer(function(request,response){
     var _url = request.url;
     var queryData = url.parse(_url, true).query;
     var pathname = url.parse(_url, true).pathname;
-    
+    // console.log(pathname);
     if (pathname === '/') {
         if (queryData.id === undefined) {
+            //홈페이지:
             fs.readdir('./data', function(error, filelist) {
                 var title = 'Welcome';
                 var description = 'Hello, Node.js';
@@ -46,6 +49,7 @@ var app = http.createServer(function(request,response){
                 response.end(template);
             })
         } else {
+            //우리가 추가하는 페이지가 있을 경우:
             fs.readdir('./data', function(error, filelist) {          
                 fs.readFile(`data/${queryData.id}`, 'utf8', function(err, description) {
                     var title = queryData.id;
@@ -56,7 +60,45 @@ var app = http.createServer(function(request,response){
                     });
                 })
             }
+        } else if(pathname === '/create') {
+            //create페이지일 경우:
+            fs.readdir('./data', function(error, filelist) {
+                var title = 'WEB - create';
+                var list = templateList(filelist);
+                var template = templateHTML(title, list, `
+                    <form action="http://localhost:3000/create_process" method="post">
+                    <p><input type="text" name="title" placeholder="title"></p>
+                    
+                    <p>
+                        <textarea name="description" id="" cols="30" rows="10" placeholder="description"></textarea>
+                    </p>
+                    
+                    <p>
+                        <input type="submit">
+                    </p>
+                    </form>
+                `);
+                response.writeHead(200);
+                response.end(template);
+            })
+        } else if (pathname === '/create_process') {
+            //submit을 눌렀을 경우:
+            var body = '';
+            
+            request.on('data', function(data) {
+                body = body + data;
+                console.log(body);
+            });
+
+            request.on('end', function(){
+                var post = qs.parse(body);
+                console.log(post.title);
+            });
+
+            response.writeHead(200);
+            response.end('success');
         } else {
+            //이도저도 아닌 pathname이면 404 출력
             response.writeHead(404);
             response.end('Not found');
         }
