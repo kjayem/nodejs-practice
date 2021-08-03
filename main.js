@@ -94,11 +94,11 @@ var app = http.createServer(function(request,response){
                 var post = qs.parse(body);
                 var title = post.title;
                 var description = post.description;
-                console.log(title);
+                fs.writeFile(`data/${title}`, description, 'utf8', function(err){
+                    response.writeHead(302, {Location: `/?id=${title}`});
+                    response.end('success');
+                })
             });
-
-            response.writeHead(200);
-            response.end('success');
         } else {
             //이도저도 아닌 pathname이면 404 출력
             response.writeHead(404);
