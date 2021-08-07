@@ -4,9 +4,8 @@ var f = function f1() {
     console.log(1+2);
 }
 
-console.log(f);
-// [Function: f1]
+var o = {
+    func:f
+}
 
-f();
-// 2
-// 3
+o.func();
